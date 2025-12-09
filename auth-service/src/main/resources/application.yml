@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:authdb;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: very-secret-key-change-me-very-secret-key-change-me-very-secret-key-change-me-very-secret-key-change-me-very-secret-key-change-me-very-secret-key-change-me-very-secret-key-change-me-very-secret-key-change-me-
+  access-token-expiration-ms: 900000 # 15 minutes
+  refresh-token-expiration-ms: 2592000000 # 30 days
+
+server:
+  port: 8081
+
+test: hello-world
