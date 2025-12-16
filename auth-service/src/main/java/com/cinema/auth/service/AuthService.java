@@ -5,11 +5,10 @@ import com.cinema.auth.dto.JwtResponse;
 import com.cinema.auth.dto.RegisterRequest;
 import com.cinema.auth.entity.User;
 import com.cinema.auth.repository.UserRepository;
-import com.cinema.auth.util.JwtUtil;
+import com.cinema.common.exception.BusinessException;
+import com.cinema.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +22,31 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
-    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
+    private final RedisLoginAttemptService loginAttemptService;
 
+    public JwtResponse login(AuthRequest request) {
+        String username = request.username();
 
+        // Check block
+        if (loginAttemptService.isBlocked(username)) {
+            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED_TOO_MANY_ATTEMPTS);
+        }
 
-    public JwtResponse login(AuthRequest req) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.username(), req.password()));
-        User user = userRepository.findByUsername(req.username()).orElseThrow();
-        String accessToken = jwtUtil.generateAccessToken(user.getUsername());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // Validate password
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            loginAttemptService.loginFailed(username);
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        }
+
+        // Login thành công
+        loginAttemptService.loginSucceeded(username);
+
+        String accessToken = jwtService.generateToken(user.getUsername());
         return new JwtResponse(accessToken, accessToken, "Bearer");
     }
 
@@ -49,7 +63,7 @@ public class AuthService {
         userRepository.save(u);
 
 
-        String accessToken = jwtUtil.generateAccessToken(u.getUsername());
+        String accessToken = jwtService.generateToken(u.getUsername());
         return new JwtResponse(accessToken, accessToken, "Bearer");
     }
 }

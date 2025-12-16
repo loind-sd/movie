@@ -13,7 +13,8 @@
     <modules>
         <module>auth-service</module>
         <module>common</module>
-<!--        <module>movie-service</module>-->
+        <module>movie-service</module>
+        <module>cinema-security-starter</module>
 <!--        <module>cinema-service</module>-->
 <!--        <module>showtime-service</module>-->
 <!--        <module>booking-service</module>-->
