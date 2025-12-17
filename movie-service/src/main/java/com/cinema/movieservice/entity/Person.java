@@ -18,12 +18,17 @@ public class Person extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Column
     @Enumerated(EnumType.STRING)
     private PersonRole role; // ACTOR, DIRECTOR
 
+    @Column
     private String avatarUrl;
 }
 

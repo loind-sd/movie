@@ -4,9 +4,8 @@ import com.cinema.common.base.ServiceResult;
 import com.cinema.common.enums.PersonRole;
 import com.cinema.common.exception.ErrorCode;
 import com.cinema.common.service.MinioService;
-import com.cinema.common.service.RedisService;
-import com.cinema.movieservice.dto.request.CreateMovieRequest;
-import com.cinema.movieservice.dto.request.UpdateMovieRequest;
+import com.cinema.movieservice.dto.request.movie.CreateMovieRequest;
+import com.cinema.movieservice.dto.request.movie.UpdateMovieRequest;
 import com.cinema.movieservice.dto.response.MovieDetailResponse;
 import com.cinema.movieservice.dto.response.PeopleResponse;
 import com.cinema.movieservice.entity.Movie;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor

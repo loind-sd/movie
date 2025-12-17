@@ -1,11 +1,12 @@
-package com.cinema.movieservice.dto.request;
+package com.cinema.movieservice.dto.request.movie;
 
 import com.cinema.common.enums.AgeRating;
 
 import java.time.LocalDate;
 import java.util.Set;
 
-public record CreateMovieRequest(
+public record UpdateMovieRequest(
+        Long id,
         String title,
         String originalTitle,
         String description,

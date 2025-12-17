@@ -1,12 +1,15 @@
 package com.cinema.common.service;
 
 import com.cinema.common.config.MinIOConfigProperties;
+import com.cinema.common.constants.DateFormatConstants;
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
 import io.minio.http.Method;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 public record MinioService(MinioClient minioClient, MinIOConfigProperties properties) {
@@ -128,6 +131,9 @@ public record MinioService(MinioClient minioClient, MinIOConfigProperties proper
     }
 
     /* ================= UTILS ================= */
+    public String buildAvatarPath(String fileName) {
+        return "posters/avatar/" + LocalDate.now().format(DateTimeFormatter.ofPattern(DateFormatConstants.C_YYYYMMDD)) + "_" + fileName;
+    }
 
     public String buildMoviePosterPath(Long movieId) {
         return "posters/movie/" + movieId + ".jpg";

@@ -1,8 +1,8 @@
 package com.cinema.movieservice.controller;
 
 import com.cinema.common.base.ServiceResult;
-import com.cinema.movieservice.dto.request.CreateMovieRequest;
-import com.cinema.movieservice.dto.request.UpdateMovieRequest;
+import com.cinema.movieservice.dto.request.movie.CreateMovieRequest;
+import com.cinema.movieservice.dto.request.movie.UpdateMovieRequest;
 import com.cinema.movieservice.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

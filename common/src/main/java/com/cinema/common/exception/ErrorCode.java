@@ -20,9 +20,19 @@ public enum ErrorCode {
     INSUFFICIENT_PERMISSIONS("1005", "Insufficient permissions to access this resource"),
 
     // movie error codes
-    MOVIE_NOT_FOUND("2001", "Movie not found"),
-    MOVIE_ALREADY_EXISTS("2002", "Movie already exists"),
-    INVALID_MOVIE_DATA("2003", "Invalid movie data provided"),
+    MOVIE_NOT_FOUND("1101", "Movie not found"),
+    MOVIE_ALREADY_EXISTS("1102", "Movie already exists"),
+    INVALID_MOVIE_DATA("1103", "Invalid movie data provided"),
+
+    // genre error codes
+    GENRE_NOT_FOUND("1201", "Genre not found"),
+    GENRE_ALREADY_EXISTS("1202", "Genre already exists"),
+    INVALID_GENRE_DATA("1203", "Invalid genre data provided"),
+
+    // person error codes
+    PERSON_NOT_FOUND("1301", "Person not found"),
+    PERSON_ALREADY_EXISTS("1302", "Person already exists"),
+    INVALID_PERSON_DATA("1303", "Invalid person data provided")
 
 
     ;

@@ -1,8 +1,8 @@
 package com.cinema.movieservice.service;
 
 import com.cinema.common.base.ServiceResult;
-import com.cinema.movieservice.dto.request.CreateMovieRequest;
-import com.cinema.movieservice.dto.request.UpdateMovieRequest;
+import com.cinema.movieservice.dto.request.movie.CreateMovieRequest;
+import com.cinema.movieservice.dto.request.movie.UpdateMovieRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MovieService {

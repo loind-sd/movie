@@ -17,11 +17,11 @@ public class JacksonAutoConfiguration {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.activateDefaultTyping(
-                mapper.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-        );
+//        mapper.activateDefaultTyping(
+//                mapper.getPolymorphicTypeValidator(),
+//                ObjectMapper.DefaultTyping.NON_FINAL,
+//                JsonTypeInfo.As.PROPERTY
+//        );
         return mapper;
     }
 }

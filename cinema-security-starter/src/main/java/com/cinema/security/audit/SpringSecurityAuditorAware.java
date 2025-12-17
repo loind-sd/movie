@@ -19,11 +19,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<Long> {
     @Override
     public Optional<Long> getCurrentAuditor() {
 
-        Authentication auth =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        System.out.println("auth = " + auth);
-
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof JwtAuthenticationToken jwtAuth)) {
             return Optional.empty();
         }
