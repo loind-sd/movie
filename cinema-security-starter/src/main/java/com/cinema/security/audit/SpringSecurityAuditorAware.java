@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
+@Component("springSecurityAuditorAware")
 @RequiredArgsConstructor
-public class SpringSecurityAuditorAware
-        implements AuditorAware<Long> {
+public class SpringSecurityAuditorAware implements AuditorAware<Long> {
 
     private final JwtClaimExtractor extractor;
 
@@ -22,6 +21,8 @@ public class SpringSecurityAuditorAware
 
         Authentication auth =
                 SecurityContextHolder.getContext().getAuthentication();
+
+        System.out.println("auth = " + auth);
 
         if (!(auth instanceof JwtAuthenticationToken jwtAuth)) {
             return Optional.empty();

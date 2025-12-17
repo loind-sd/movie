@@ -12,9 +12,10 @@ public class JwtClaimExtractor {
     private final JwtProperties properties;
 
     public Long extractUserId(Jwt jwt) {
-        if ("sub".equals(properties.getUserIdClaim())) {
+        try {
             return Long.parseLong(jwt.getSubject());
+        } catch (NumberFormatException e) {
+            return null;
         }
-        return jwt.getClaim(properties.getUserIdClaim());
     }
 }

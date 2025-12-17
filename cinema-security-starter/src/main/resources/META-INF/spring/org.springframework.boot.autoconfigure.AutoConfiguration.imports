@@ -1,3 +1,5 @@
+com.cinema.security.support.JwtClaimExtractor
+com.cinema.security.audit.SpringSecurityAuditorAware
 com.cinema.security.config.SecurityAutoConfiguration
 com.cinema.security.config.JpaAuditConfig
 com.cinema.security.filter.LoggingAutoConfiguration

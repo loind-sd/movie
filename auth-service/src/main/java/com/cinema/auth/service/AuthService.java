@@ -40,7 +40,7 @@ public class AuthService {
         // Login thành công
         loginAttemptService.loginSucceeded(username);
 
-        String accessToken = jwtService.generateToken(user.getUsername());
+        String accessToken = jwtService.generateToken(String.valueOf(user.getId()));
         return new JwtResponse(accessToken, accessToken, "Bearer");
     }
 
@@ -57,7 +57,7 @@ public class AuthService {
         userRepository.save(u);
 
 
-        String accessToken = jwtService.generateToken(u.getUsername());
+        String accessToken = jwtService.generateToken(String.valueOf(u.getId()));
         return new JwtResponse(accessToken, accessToken, "Bearer");
     }
 }
