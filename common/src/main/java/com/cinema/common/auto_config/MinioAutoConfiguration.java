@@ -1,0 +1,63 @@
+package com.cinema.common.auto_config;
+
+import com.cinema.common.config.MinIOConfigProperties;
+import com.cinema.common.service.MinioService;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+
+@AutoConfiguration
+@EnableConfigurationProperties(MinIOConfigProperties.class)
+@ConditionalOnClass(MinioClient.class)
+@ConditionalOnProperty(prefix = "minio", name = "url")
+public class MinioAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MinioClient minioClient(MinIOConfigProperties props) {
+        return MinioClient.builder()
+                .endpoint(props.getUrl())
+                .credentials(props.getAccessKey(), props.getSecretKey())
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MinioService minioService(
+            MinioClient minioClient,
+            MinIOConfigProperties properties
+    ) {
+        return new MinioService(minioClient, properties);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "minio", name = "bucket")
+    public ApplicationRunner initBucket(
+            MinioClient minioClient,
+            MinIOConfigProperties props
+    ) {
+        return args -> {
+            boolean exists = minioClient.bucketExists(
+                    BucketExistsArgs.builder()
+                            .bucket(props.getBucket())
+                            .build()
+            );
+
+            if (!exists) {
+                minioClient.makeBucket(
+                        MakeBucketArgs.builder()
+                                .bucket(props.getBucket())
+                                .build()
+                );
+            }
+        };
+    }
+}
+

@@ -1,6 +1,7 @@
 package com.cinema.movieservice.dto.response;
 
 import com.cinema.common.constants.DateFormatConstants;
+import com.cinema.common.enums.AgeRating;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -16,7 +17,7 @@ public class MovieDetailResponse {
     private Integer duration;
     @JsonFormat(pattern = DateFormatConstants.C_DD_MM_YYYY)
     private LocalDate releaseDate;
-    private String ageRating;
+    private AgeRating ageRating;
 
     private String posterUrl;
     private String thumbnailUrl;

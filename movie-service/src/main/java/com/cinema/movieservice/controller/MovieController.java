@@ -2,6 +2,7 @@ package com.cinema.movieservice.controller;
 
 import com.cinema.common.base.ServiceResult;
 import com.cinema.movieservice.dto.request.CreateMovieRequest;
+import com.cinema.movieservice.dto.request.UpdateMovieRequest;
 import com.cinema.movieservice.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,36 @@ public class MovieController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createMovies(
-            @RequestPart("poster") MultipartFile poster,
+            @RequestPart(value = "poster", required = false) MultipartFile poster,
             @Valid @RequestPart("data") CreateMovieRequest request
     ) {
         ServiceResult result = movieService.create(poster, request);
         return ResponseEntity.ok(result);
     }
+
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> update(
+            @RequestPart(value = "poster", required = false) MultipartFile poster,
+            @Valid @RequestPart("data") UpdateMovieRequest request
+    ) {
+        ServiceResult result = movieService.update(poster, request);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{movieId}")
+    public ResponseEntity<?> delete(@PathVariable Long movieId) {
+        ServiceResult result = movieService.delete(movieId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{movieId}")
+    public ResponseEntity<?> getDetail(
+            @PathVariable("movieId") Long movieId
+    ) {
+        ServiceResult result = movieService.getDetail(movieId);
+        return ResponseEntity.ok(result);
+    }
+
+
 
 }

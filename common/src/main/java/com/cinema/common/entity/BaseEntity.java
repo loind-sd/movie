@@ -1,15 +1,15 @@
 package com.cinema.common.entity;
 
-import jakarta.persistence.*;
-
-import java.time.*;
-import java.util.Date;
-
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
+
+import java.util.Date;
 
 @MappedSuperclass
 @Getter

@@ -3,6 +3,8 @@ package com.cinema.movieservice.service.impl;
 import com.cinema.common.base.ServiceResult;
 import com.cinema.common.enums.PersonRole;
 import com.cinema.common.exception.ErrorCode;
+import com.cinema.common.service.MinioService;
+import com.cinema.common.service.RedisService;
 import com.cinema.movieservice.dto.request.CreateMovieRequest;
 import com.cinema.movieservice.dto.request.UpdateMovieRequest;
 import com.cinema.movieservice.dto.response.MovieDetailResponse;
@@ -12,16 +14,17 @@ import com.cinema.movieservice.entity.MovieGenres;
 import com.cinema.movieservice.repository.MovieGenresRepository;
 import com.cinema.movieservice.repository.MoviePeopleRepository;
 import com.cinema.movieservice.repository.MovieRepository;
-import com.cinema.movieservice.service.MinioService;
 import com.cinema.movieservice.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +43,14 @@ public class MovieServiceImpl implements MovieService {
         BeanUtils.copyProperties(request, movie);
 
         if (poster != null) {
-            String objectPath = minioService.buildMoviePosterPath(new Random().nextLong());
-            String posterUrl = minioService.upload(objectPath, poster);
-            movie.setPosterUrl(posterUrl);
-            log.debug("Uploaded poster to URL: {}", posterUrl);
+            try {
+                String objectPath = minioService.buildMoviePosterPath(new Random().nextLong());
+                String posterUrl = minioService.upload(objectPath, poster.getInputStream(), poster.getSize(), poster.getContentType());
+                movie.setPosterUrl(posterUrl);
+                log.debug("Uploaded poster to URL: {}", posterUrl);
+            } catch (Exception e) {
+                log.error("Failed to upload poster", e);
+            }
         }
 
         movieRepository.save(movie);
@@ -71,10 +78,14 @@ public class MovieServiceImpl implements MovieService {
             BeanUtils.copyProperties(request, movie);
 
             if (poster != null) {
-                String objectPath = minioService.buildMoviePosterPath(movie.getId());
-                String posterUrl = minioService.upload(objectPath, poster);
-                movie.setPosterUrl(posterUrl);
-                log.debug("Uploaded new poster to URL: {}", posterUrl);
+                try {
+                    String objectPath = minioService.buildMoviePosterPath(new Random().nextLong());
+                    String posterUrl = minioService.upload(objectPath, poster.getInputStream(), poster.getSize(), poster.getContentType());
+                    movie.setPosterUrl(posterUrl);
+                    log.debug("Uploaded poster to URL: {}", posterUrl);
+                } catch (Exception e) {
+                    log.error("Failed to upload poster", e);
+                }
             }
 
             movieRepository.save(movie);
@@ -104,6 +115,9 @@ public class MovieServiceImpl implements MovieService {
             Movie movie = optionalMovie.get();
             MovieDetailResponse response = new MovieDetailResponse();
             BeanUtils.copyProperties(movie, response);
+            if (StringUtils.isNotBlank(movie.getPosterUrl())) {
+                response.setPosterUrl(minioService.generatePresignedUrl(movie.getPosterUrl(), 60));
+            }
 
             response.setGenres(movieGenresRepository.findAllByMovieId(movieId));
             List<PeopleResponse> people = moviePeopleRepository.findByMovieId(movieId);

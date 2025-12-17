@@ -1,7 +1,7 @@
 package com.cinema.common.event;
 
-import com.cinema.common.dto.UserDto;
 import com.cinema.common.dto.MovieDto;
+import com.cinema.common.dto.UserDto;
 import com.cinema.common.enums.BookingStatus;
 
 import java.time.Instant;

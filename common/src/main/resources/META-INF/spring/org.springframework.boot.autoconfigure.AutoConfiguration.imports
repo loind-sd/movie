@@ -1,0 +1,3 @@
+com.cinema.common.config.RedisConfig
+com.cinema.common.auto_config.RedisAutoConfiguration
+com.cinema.common.auto_config.MinioAutoConfiguration

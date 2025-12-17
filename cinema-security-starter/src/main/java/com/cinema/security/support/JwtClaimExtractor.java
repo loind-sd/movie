@@ -2,8 +2,8 @@ package com.cinema.security.support;
 
 import com.cinema.security.config.JwtProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor

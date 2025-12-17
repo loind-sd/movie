@@ -8,14 +8,8 @@ import com.cinema.auth.repository.UserRepository;
 import com.cinema.common.exception.BusinessException;
 import com.cinema.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
