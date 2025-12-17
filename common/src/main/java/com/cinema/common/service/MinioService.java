@@ -28,7 +28,7 @@ public record MinioService(MinioClient minioClient, MinIOConfigProperties proper
                             .contentType(contentType)
                             .build()
             );
-            return buildPublicUrl(objectPath);
+            return objectPath;
         } catch (Exception e) {
             log.error("Upload stream failed: {}", objectPath, e);
             throw new RuntimeException("Upload stream failed");

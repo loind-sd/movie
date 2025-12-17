@@ -19,6 +19,10 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnProperty(prefix = "minio", name = "url")
 public class MinioAutoConfiguration {
 
+    /**
+     * Tạo bean MinioClient nếu chưa có bean nào cùng loại được định nghĩa trong ngữ cảnh ứng dụng.
+     * Sử dụng cấu hình từ MinIOConfigProperties để khởi tạo MinioClient.
+     */
     @Bean
     @ConditionalOnMissingBean
     public MinioClient minioClient(MinIOConfigProperties props) {
@@ -28,6 +32,10 @@ public class MinioAutoConfiguration {
                 .build();
     }
 
+    /**
+     * Tạo bean MinioService nếu chưa có bean nào cùng loại được định nghĩa trong ngữ cảnh ứng dụng.
+     * Sử dụng MinioClient và MinIOConfigProperties để khởi tạo MinioService.
+     */
     @Bean
     @ConditionalOnMissingBean
     public MinioService minioService(
@@ -37,6 +45,10 @@ public class MinioAutoConfiguration {
         return new MinioService(minioClient, properties);
     }
 
+    /**
+     * Tạo ApplicationRunner để khởi tạo bucket trong MinIO nếu chưa tồn tại.
+     * Sử dụng MinioClient và MinIOConfigProperties để kiểm tra và tạo bucket.
+     */
     @Bean
     @ConditionalOnProperty(prefix = "minio", name = "bucket")
     public ApplicationRunner initBucket(
