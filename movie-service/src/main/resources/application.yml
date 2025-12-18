@@ -15,6 +15,9 @@ spring:
       password:
       timeout: 2000
 
+  elasticsearch:
+    uris: http://localhost:9200
+
   servlet:
     multipart:
       enabled: true

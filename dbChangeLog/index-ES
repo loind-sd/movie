@@ -1,0 +1,47 @@
+PUT movies
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "vi_autocomplete_analyzer": {
+          "tokenizer": "edge_ngram_tokenizer",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      },
+      "tokenizer": {
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20,
+          "token_chars": ["letter", "digit"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "fields": {
+          "ascii": {
+            "type": "text",
+            "analyzer": "vi_autocomplete_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "actors": {
+        "type": "text"
+      },
+      "genres": {
+        "type": "keyword"
+      },
+      "releaseDate": {
+        "type": "date"
+      }
+    }
+  }
+}

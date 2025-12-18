@@ -49,6 +49,14 @@ public class MovieController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping
+    public ResponseEntity<?> getWithPaging(
+            @RequestParam(required = false) String keyword
+    ) {
+        ServiceResult result = movieService.getWithPaging(keyword);
+        return ResponseEntity.ok(result);
+    }
+
 
 
 }

@@ -10,4 +10,5 @@ public interface MovieService {
     ServiceResult update(MultipartFile poster, UpdateMovieRequest request);
     ServiceResult delete(Long movieId);
     ServiceResult getDetail(Long movieId);
+    ServiceResult getWithPaging(String keyword);
 }

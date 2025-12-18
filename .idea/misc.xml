@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/common/pom.xml" />
         <option value="$PROJECT_DIR$/cinema-security-starter/pom.xml" />
         <option value="$PROJECT_DIR$/cinema-service/pom.xml" />
+        <option value="$PROJECT_DIR$/debezium-service/pom.xml" />
       </list>
     </option>
   </component>
