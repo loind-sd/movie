@@ -32,8 +32,12 @@ public enum ErrorCode {
     // person error codes
     PERSON_NOT_FOUND("1301", "Person not found"),
     PERSON_ALREADY_EXISTS("1302", "Person already exists"),
-    INVALID_PERSON_DATA("1303", "Invalid person data provided")
+    INVALID_PERSON_DATA("1303", "Invalid person data provided"),
 
+    // room error codes
+    ROOM_NOT_FOUND("1401", "Room not found"),
+    ROOM_ALREADY_EXISTS("1402", "Room already exists"),
+    INVALID_ROOM_DATA("1403", "Invalid room data provided"),
 
     ;
 
