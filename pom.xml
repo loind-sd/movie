@@ -16,7 +16,7 @@
         <module>movie-service</module>
         <module>cinema-security-starter</module>
         <module>cinema-service</module>
-<!--        <module>showtime-service</module>-->
+        <module>showtime-service</module>
 <!--        <module>booking-service</module>-->
 <!--        <module>payment-service</module>-->
 <!--        <module>notification-service</module>-->

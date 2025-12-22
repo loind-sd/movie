@@ -4,12 +4,15 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-    OK("0", "SUCCES"),
+    OK("0", "SUCCESS"),
     INVALID_REQUEST("400", "Invalid request"),
     UNAUTHORIZED("401", "Unauthorized access"),
     FORBIDDEN("403", "Forbidden"),
     INTERNAL_SERVER_ERROR("500", "Internal server error"),
     NOT_FOUND("404", "Resource not found"),
+
+    // common error codes
+    TIME_INVALID("901", "Time value is invalid"),
 
 
     // user error codes
@@ -38,6 +41,15 @@ public enum ErrorCode {
     ROOM_NOT_FOUND("1401", "Room not found"),
     ROOM_ALREADY_EXISTS("1402", "Room already exists"),
     INVALID_ROOM_DATA("1403", "Invalid room data provided"),
+
+    // showtime error codes
+    SHOWTIME_NOT_FOUND("1501", "Showtime not found"),
+    SHOWTIME_ALREADY_EXISTS("1502", "Showtime already exists"),
+    INVALID_SHOWTIME_DATA("1503", "Invalid showtime data provided"),
+    SHOWTIME_CONFLICT("1504", "Showtime conflicts with existing schedule"),
+    SHOWTIME_NOT_SUITABLE_ROOM("1505", "No available rooms for the requested showtime"),
+    SHOWTIME_DUPLICATE_TIME_SLOT("1506", "Showtime has a duplicate time slot"),
+
 
     ;
 
