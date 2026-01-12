@@ -1,0 +1,61 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      routes:
+
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+
+        - id: movie-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/movies/**
+            - Path=/api/genres/**
+            - Path=/api/persons/**
+
+        - id: cinema-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/rooms/**
+
+        - id: showtime-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/showtime/**
+
+        - id: booking-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/bookings/**
+
+        - id: payment-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/payment/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG

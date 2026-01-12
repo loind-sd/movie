@@ -40,6 +40,12 @@
             <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.cinema</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

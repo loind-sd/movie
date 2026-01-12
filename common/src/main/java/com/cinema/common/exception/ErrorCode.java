@@ -21,6 +21,7 @@ public enum ErrorCode {
     INVALID_CREDENTIALS("1003", "Invalid username or password"),
     PASSWORD_EXPIRED("1004", "Password has expired"),
     INSUFFICIENT_PERMISSIONS("1005", "Insufficient permissions to access this resource"),
+    REFRESH_TOKEN_INVALID("1006", "REFRESH_TOKEN_INVALID"),
 
     // movie error codes
     MOVIE_NOT_FOUND("1101", "Movie not found"),
@@ -49,6 +50,17 @@ public enum ErrorCode {
     SHOWTIME_CONFLICT("1504", "Showtime conflicts with existing schedule"),
     SHOWTIME_NOT_SUITABLE_ROOM("1505", "No available rooms for the requested showtime"),
     SHOWTIME_DUPLICATE_TIME_SLOT("1506", "Showtime has a duplicate time slot"),
+
+    // booking error codes
+    BOOKING_NOT_FOUND("1601", "Booking not found"),
+    BOOKING_ALREADY_EXISTS("1602", "Booking already exists"),
+    INVALID_BOOKING_DATA("1603", "Invalid booking data provided"),
+    SEAT_ALREADY_BOOKED("1604", "Seat is already booked"),
+
+    // payment error codes
+    PAYMENT_NOT_FOUND("1701", "Payment not found"),
+    PAYMENT_ALREADY_PAID("1702", "Payment already paid"),
+
 
 
     ;

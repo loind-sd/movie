@@ -10,4 +10,6 @@ public interface ShowtimeService {
     ServiceResult getDetails(Long showtimeId);
     ServiceResult update(UpdateShowtimeRequest request);
     ServiceResult searchShowTime(SearchShowtimeRequest request);
+
+    ServiceResult getShowtimeMap(Long showtimeId);
 }

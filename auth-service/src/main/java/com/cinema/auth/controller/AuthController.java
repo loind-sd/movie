@@ -4,6 +4,7 @@ import com.cinema.auth.dto.AuthRequest;
 import com.cinema.auth.dto.JwtResponse;
 import com.cinema.auth.dto.RegisterRequest;
 import com.cinema.auth.service.AuthService;
+import com.cinema.common.dto.RefreshTokenRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,8 +38,8 @@ public class AuthController {
     }
 
 
-//    @PostMapping("/refresh")
-//    public ResponseEntity<JwtResponse> refresh(@RequestParam("refreshToken") String refreshToken) {
-//        return ResponseEntity.ok(authService.refreshToken(refreshToken));
-//    }
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshTokenRequest req) {
+        return ResponseEntity.ok(authService.refresh(req));
+    }
 }

@@ -1,9 +1,11 @@
 package com.cinema.common.enums;
 
 public enum BookingStatus {
-    INIT,
+    HOLDING,
     RESERVED,
     PAID,
     CANCELLED,
-    EXPIRED
+    EXPIRED,
+
+    EMPTY // ghế trống
 }

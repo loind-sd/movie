@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -31,6 +33,12 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public void removeValue(String key) {
         redisTemplate.delete(key);
+    }
+
+    @Override
+    public Set<String> findKeysWithPrefix(String prefix) {
+        String pattern = prefix + "*"; // Ví dụ: "SHOWTIME_*"
+        return redisTemplate.keys(pattern);
     }
 
     @Override

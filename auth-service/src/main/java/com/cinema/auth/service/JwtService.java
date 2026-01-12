@@ -4,6 +4,7 @@ import com.cinema.auth.config.JwtKeyProvider;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +24,10 @@ public class JwtService {
     @Value("${jwt.refresh-token-expire}")
     private Long refreshTokenExpire;
 
-    public String generateToken(
-            String userId
-    ) {
+    public Pair<String, String> generateToken(String userId) {
         Instant now = Instant.now();
 
-        return Jwts.builder()
+        String accessToken = Jwts.builder()
                 .setSubject(userId)
                 .setIssuer(issuer)
 //                .claim("username", username)
@@ -37,6 +36,18 @@ public class JwtService {
                 .setExpiration(Date.from(now.plus(accessTokenExpire, ChronoUnit.MILLIS)))
                 .signWith(keyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
+
+        String refreshToken = Jwts.builder()
+                .setSubject(userId)
+                .setIssuer(issuer)
+//                .claim("username", username)
+//                .claim("roles", roles)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plus(refreshTokenExpire, ChronoUnit.MILLIS)))
+                .signWith(keyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
+                .compact();
+
+        return Pair.of(accessToken, refreshToken);
     }
 }
 

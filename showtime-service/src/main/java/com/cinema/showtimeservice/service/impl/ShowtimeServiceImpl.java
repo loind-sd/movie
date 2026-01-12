@@ -1,31 +1,35 @@
 package com.cinema.showtimeservice.service.impl;
 
 import com.cinema.common.base.ServiceResult;
+import com.cinema.common.constants.CommonConstants;
+import com.cinema.common.dto.RefreshTokenRequest;
+import com.cinema.common.enums.BookingStatus;
 import com.cinema.common.enums.ShowtimeStatus;
+import com.cinema.common.exception.BadRequestException;
 import com.cinema.common.exception.ErrorCode;
+import com.cinema.common.service.RedisService;
+import com.cinema.security.service.CurrentUserService;
 import com.cinema.showtimeservice.dto.request.SearchShowtimeRequest;
 import com.cinema.showtimeservice.dto.request.UpdateShowtimeRequest;
+import com.cinema.showtimeservice.dto.response.RoomSeatMapItem;
+import com.cinema.showtimeservice.dto.response.RoomSeatMapResponse;
 import com.cinema.showtimeservice.dto.response.ShowtimeDetailResponse;
 import com.cinema.showtimeservice.dto.response.ShowtimeItemResponse;
-import com.cinema.showtimeservice.entity.Movie;
+import com.cinema.showtimeservice.entity.*;
 import com.cinema.showtimeservice.dto.request.CreateShowtimeRequest;
-import com.cinema.showtimeservice.entity.Showtime;
-import com.cinema.showtimeservice.entity.ShowtimePrice;
 import com.cinema.showtimeservice.mapper.ShowtimeMapper;
 import com.cinema.showtimeservice.mapper.ShowtimePriceMapper;
-import com.cinema.showtimeservice.repository.MovieRepository;
-import com.cinema.showtimeservice.repository.ShowtimePriceRepository;
-import com.cinema.showtimeservice.repository.ShowtimeRepository;
+import com.cinema.showtimeservice.repository.*;
 import com.cinema.showtimeservice.service.ShowtimeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -37,6 +41,12 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     private final ShowtimePriceRepository showtimePriceRepository;
     private final ShowtimeMapper showtimeMapper;
     private final ShowtimePriceMapper showtimePriceMapper;
+
+    private final RoomRepository roomRepository;
+    private final SeatRepository seatRepository;
+    private final RedisService redisService;
+
+    private final RestTemplate restTemplate;
 
     @Override
     public ServiceResult create(CreateShowtimeRequest request) {
@@ -165,5 +175,46 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     public ServiceResult searchShowTime(SearchShowtimeRequest request) {
         List<ShowtimeItemResponse> responses = showtimeRepository.searchShowTime(request);
         return ServiceResult.ok(responses);
+    }
+
+    @Override
+    public ServiceResult getShowtimeMap(Long showtimeId) {
+        Optional<Showtime> showtimeOptional = showtimeRepository.findById(showtimeId);
+        if (showtimeOptional.isEmpty()) {
+            throw new BadRequestException(ErrorCode.SHOWTIME_NOT_FOUND);
+        }
+
+        Showtime showtime = showtimeOptional.get();
+        Long roomId = showtime.getRoomId();
+        Optional<Room> roomOptional = roomRepository.findById(roomId);
+        if (roomOptional.isEmpty()) {
+            throw new BadRequestException(ErrorCode.ROOM_NOT_FOUND);
+        }
+
+        RoomSeatMapResponse response = new RoomSeatMapResponse();
+        BeanUtils.copyProperties(roomOptional.get(), response);
+
+        List<Seat> seats = seatRepository.findByRoomId(roomId);
+        List<RoomSeatMapItem> seatMapItems = new ArrayList<>();
+
+        Set<String> redisSeatKey = redisService.findKeysWithPrefix(CommonConstants.RedisKey.SEAT_KEY_PREFIX + showtimeId);
+        List<Long> seatPaidList = seatRepository.findBookingSeat(showtimeId);
+        for (String item : redisSeatKey) {
+            // SHOWTIME_1_SEAT_2
+            String[] parts = item.split("_");
+            seatPaidList.add(Long.valueOf(parts[3]));
+        }
+
+        for (Seat seat : seats) {
+            RoomSeatMapItem item = new RoomSeatMapItem();
+            BeanUtils.copyProperties(seat, item);
+            if (seatPaidList.contains(seat.getId())) {
+                item.setBookingStatus(BookingStatus.PAID);
+            }
+            seatMapItems.add(item);
+        }
+        response.setSeatMap(seatMapItems);
+
+        return ServiceResult.ok(response);
     }
 }

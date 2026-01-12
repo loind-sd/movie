@@ -33,6 +33,12 @@ public class ShowtimeController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/seatMap/{id}")
+    public ResponseEntity<ServiceResult> searchShowTime(@PathVariable Long id) {
+        ServiceResult result = showtimeService.getShowtimeMap(id);
+        return ResponseEntity.ok(result);
+    }
+
     @PutMapping()
     public ResponseEntity<ServiceResult> update(@RequestBody UpdateShowtimeRequest request) {
         ServiceResult result = showtimeService.update(request);

@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/movie
+    username: postgres
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:public.pem
+
+cinema:
+  security:
+    jwt:
+      user-id-claim: sub
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+server:
+  port: 8086

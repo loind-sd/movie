@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>gateway</module>
         <module>auth-service</module>
         <module>common</module>
         <module>movie-service</module>

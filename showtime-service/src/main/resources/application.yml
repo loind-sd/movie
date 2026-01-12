@@ -13,6 +13,8 @@ spring:
       resourceserver:
         jwt:
           public-key-location: classpath:public.pem
+  application:
+    name: showtime-service
 
 cinema:
   security:

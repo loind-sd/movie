@@ -29,6 +29,8 @@ public class User {
 
     private String fullName;
 
+    private String refreshToken;
+
 
     private Instant createdAt = Instant.now();
 }
