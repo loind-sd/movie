@@ -2,12 +2,15 @@ package com.cinema.showtimeservice.service.impl;
 
 import com.cinema.common.base.ServiceResult;
 import com.cinema.common.constants.CommonConstants;
-import com.cinema.common.dto.RefreshTokenRequest;
+import com.cinema.common.dto.kafkaMessage.MovieRatingEvent;
+import com.cinema.common.dto.kafkaMessage.MovieViewEvent;
 import com.cinema.common.enums.BookingStatus;
 import com.cinema.common.enums.ShowtimeStatus;
 import com.cinema.common.exception.BadRequestException;
 import com.cinema.common.exception.ErrorCode;
+import com.cinema.common.service.PrefixSearchSuggestionService;
 import com.cinema.common.service.RedisService;
+import com.cinema.kafka.procedure.KafkaProducer;
 import com.cinema.security.service.CurrentUserService;
 import com.cinema.showtimeservice.dto.request.SearchShowtimeRequest;
 import com.cinema.showtimeservice.dto.request.UpdateShowtimeRequest;
@@ -21,6 +24,8 @@ import com.cinema.showtimeservice.mapper.ShowtimeMapper;
 import com.cinema.showtimeservice.mapper.ShowtimePriceMapper;
 import com.cinema.showtimeservice.repository.*;
 import com.cinema.showtimeservice.service.ShowtimeService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -34,7 +39,6 @@ import java.util.*;
 @Service
 @Transactional
 @Slf4j
-@RequiredArgsConstructor
 public class ShowtimeServiceImpl implements ShowtimeService {
     private final ShowtimeRepository showtimeRepository;
     private final MovieRepository movieRepository;
@@ -47,6 +51,29 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     private final RedisService redisService;
 
     private final RestTemplate restTemplate;
+    private final KafkaProducer kafkaProducer;
+    private final PrefixSearchSuggestionService prefixSearchSuggestionService;
+
+    private final Counter showtimeCounter;
+
+    private final Random random = new Random();
+
+    public ShowtimeServiceImpl(ShowtimeRepository showtimeRepository, MovieRepository movieRepository, ShowtimePriceRepository showtimePriceRepository, ShowtimeMapper showtimeMapper, ShowtimePriceMapper showtimePriceMapper, RoomRepository roomRepository, SeatRepository seatRepository, RedisService redisService, RestTemplate restTemplate, KafkaProducer kafkaProducer, PrefixSearchSuggestionService prefixSearchSuggestionService, MeterRegistry registry) {
+        this.showtimeRepository = showtimeRepository;
+        this.movieRepository = movieRepository;
+        this.showtimePriceRepository = showtimePriceRepository;
+        this.showtimeMapper = showtimeMapper;
+        this.showtimePriceMapper = showtimePriceMapper;
+        this.roomRepository = roomRepository;
+        this.seatRepository = seatRepository;
+        this.redisService = redisService;
+        this.restTemplate = restTemplate;
+        this.kafkaProducer = kafkaProducer;
+        this.prefixSearchSuggestionService = prefixSearchSuggestionService;
+        this.showtimeCounter = Counter.builder("showtime_total")
+                .description("Total Showtime")
+                .register(registry);
+    }
 
     @Override
     public ServiceResult create(CreateShowtimeRequest request) {
@@ -104,18 +131,24 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     }
 
     @Override
-    public ServiceResult getDetails(Long showtimeId) {
+    public ServiceResult getDetails(Long showtimeId) throws Exception {
         log.debug("Get showtime details for id: {}", showtimeId);
         Optional<Showtime> showtimeOpt = showtimeRepository.findById(showtimeId);
         if (showtimeOpt.isEmpty()) {
             log.warn("Showtime with id {} not found", showtimeId);
-            return ServiceResult.fail(ErrorCode.SHOWTIME_NOT_FOUND);
+            throw new BadRequestException(ErrorCode.SHOWTIME_NOT_FOUND);
         }
 
         Showtime showtime = showtimeOpt.get();
         ShowtimeDetailResponse response = showtimeMapper.toShowtimeDetailResponse(showtime);
         List<ShowtimePrice> prices = showtimePriceRepository.findByShowtimeId(showtimeId);
         response.setPrices(showtimePriceMapper.toShowtimePriceItems(prices));
+
+        showtimeCounter.increment();
+
+        if (1 == 1) {
+            throw new Exception("hihi");
+        }
 
         return ServiceResult.ok(response);
     }
@@ -215,6 +248,45 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         }
         response.setSeatMap(seatMapItems);
 
+        MovieViewEvent event = new MovieViewEvent();
+        event.setUserId(CurrentUserService.INSTANCE.getCurrentUserLogin().toString());
+        event.setMovieId("1");
+        event.setTimestamp(LocalDateTime.now());
+        kafkaProducer.send("movie.view", event);
+
+        for (int i = 0; i < 5000; i++) {
+            MovieRatingEvent movieRatingEvent = new MovieRatingEvent();
+            movieRatingEvent.setUserId("1");
+            movieRatingEvent.setMovieId("2");
+            movieRatingEvent.setRate(random.nextInt(1, 6));
+            movieRatingEvent.setTimestamp(LocalDateTime.now());
+            kafkaProducer.send("movie.rating", movieRatingEvent);
+            try {
+                Thread.sleep(2);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return ServiceResult.ok(response);
+    }
+
+    @Override
+    public ServiceResult recordSearch(String keyword) {
+        prefixSearchSuggestionService.recordSearch(CommonConstants.RedisKey.PREFIX_SUGGESTION, keyword);
+        return ServiceResult.ok();
+    }
+
+    @Override
+    public ServiceResult suggestions(String keyword, Integer limit) throws Exception {
+        showtimeRepository.slowQuery(10);
+
+        if (1 == 1) {
+            throw new Exception("hihi");
+        }
+
+        return ServiceResult.ok(prefixSearchSuggestionService.suggest(
+                CommonConstants.RedisKey.PREFIX_SUGGESTION, keyword, limit
+        ));
     }
 }

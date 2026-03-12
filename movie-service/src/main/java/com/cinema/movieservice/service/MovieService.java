@@ -11,4 +11,5 @@ public interface MovieService {
     ServiceResult delete(Long movieId);
     ServiceResult getDetail(Long movieId);
     ServiceResult getWithPaging(String keyword);
+    ServiceResult suggestions(String keyword, Integer limit);
 }

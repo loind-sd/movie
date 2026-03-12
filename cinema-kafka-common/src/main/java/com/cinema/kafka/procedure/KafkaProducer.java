@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class KafkaProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     public <T> void send(String topic, T message) {
         try {

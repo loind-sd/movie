@@ -1,10 +1,13 @@
 package com.cinema.movieservice.service.impl;
 
 import com.cinema.common.base.ServiceResult;
+import com.cinema.common.constants.CommonConstants;
 import com.cinema.common.dto.PageResult;
 import com.cinema.common.enums.PersonRole;
 import com.cinema.common.exception.ErrorCode;
 import com.cinema.common.service.MinioService;
+import com.cinema.common.service.PrefixSearchSuggestionService;
+import com.cinema.common.service.RedisService;
 import com.cinema.movieservice.dto.es_model.MovieDocument;
 import com.cinema.movieservice.dto.request.movie.CreateMovieRequest;
 import com.cinema.movieservice.dto.request.movie.UpdateMovieRequest;
@@ -19,6 +22,7 @@ import com.cinema.movieservice.repository.MoviePeopleRepository;
 import com.cinema.movieservice.repository.MovieRepository;
 import com.cinema.movieservice.service.MovieService;
 import com.cinema.movieservice.service.searchES.MovieSearchService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +47,9 @@ public class MovieServiceImpl implements MovieService {
     private final MovieGenresRepository movieGenresRepository;
     private final MoviePeopleRepository moviePeopleRepository;
     private final MinioService minioService;
+    private final PrefixSearchSuggestionService prefixSearchSuggestionService;
+    private final RedisService redisService;
+    private final ObjectMapper objectMapper;
 
     @Override
     public ServiceResult create(MultipartFile poster, CreateMovieRequest request) {
@@ -141,6 +150,71 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public ServiceResult getDetail(Long movieId) {
         log.debug("Get Movie Detail");
+
+        try {
+            Object data = redisService.getValue(CommonConstants.RedisKey.PREFIX_MOVIE_DETAIL + movieId);
+            if (Objects.equals(data, "NULL")) {
+                log.info("Cache hit for movie detail (null), ID: {}", movieId);
+                return ServiceResult.fail(ErrorCode.MOVIE_NOT_FOUND);
+            }
+            if (data != null) {
+                log.info("Cache hit for movie detail, ID: {}", movieId);
+                MovieDetailResponse response = (MovieDetailResponse) data;
+                return ServiceResult.ok(response);
+            }
+        } catch (Exception e) {
+            log.error("Failed to record analytics", e);
+        }
+
+        int retryCount = 1;
+        while (retryCount++ < 3) {
+            boolean lock = tryLock(CommonConstants.RedisKey.PREFIX_MOVIE_DETAIL_LOCK + movieId, 10, TimeUnit.SECONDS);
+            if (lock) {
+                try {
+                    // Double check cache after acquiring lock
+                    Object data = redisService.getValue(CommonConstants.RedisKey.PREFIX_MOVIE_DETAIL + movieId);
+                    if (Objects.equals(data, "NULL")) {
+                        log.info("Cache hit for movie detail (null) after lock, ID: {}", movieId);
+                        return ServiceResult.fail(ErrorCode.MOVIE_NOT_FOUND);
+                    }
+                    if (data != null) {
+                        log.info("Cache hit for movie detail after lock, ID: {}", movieId);
+                        MovieDetailResponse response = (MovieDetailResponse) data;
+                        return ServiceResult.ok(response);
+                    }
+
+                    // Cache miss, proceed to fetch from DB
+                    log.info("Cache miss for movie detail, fetching from DB, ID: {}", movieId);
+                    // đoạn này gọi db để lấy dữ liệu, sau đó cache lại, cuối cùng trả về response
+
+
+                } catch (Exception e) {
+                    log.error("Failed to get movie detail", e);
+                } finally {
+                    redisService.removeValue(CommonConstants.RedisKey.PREFIX_MOVIE_DETAIL_LOCK);
+                }
+            } else {
+                log.info("Failed to acquire lock for movie detail, ID: {}, another thread is fetching data", movieId);
+                try {
+                    Thread.sleep(100); // Wait briefly before retrying
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                // check thử xem đã có cache chưa sau khi chờ
+                Object data = redisService.getValue(CommonConstants.RedisKey.PREFIX_MOVIE_DETAIL + movieId);
+                if (Objects.equals(data, "NULL")) {
+                    log.info("Cache hit for movie detail (null) after lock, ID: {}", movieId);
+                    return ServiceResult.fail(ErrorCode.MOVIE_NOT_FOUND);
+                }
+                if (data != null) {
+                    log.info("Cache hit for movie detail after lock, ID: {}", movieId);
+                    MovieDetailResponse response = (MovieDetailResponse) data;
+                    return ServiceResult.ok(response);
+                }
+            }
+        }
+
         Optional<Movie> optionalMovie = movieRepository.findById(movieId);
         if (optionalMovie.isPresent()) {
             Movie movie = optionalMovie.get();
@@ -167,10 +241,33 @@ public class MovieServiceImpl implements MovieService {
             response.setDirectors(directors);
             response.setActors(actors);
 
+            try {
+                long ttl = 60 + ThreadLocalRandom.current().nextLong(30);
+                redisService.setValueWithExpireTime(CommonConstants.RedisKey.PREFIX_MOVIE_DETAIL + movieId, response, ttl, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                log.error("Failed to cache movie detail", e);
+            }
+
             log.debug("Fetched movie details for ID: {}", movieId);
             return ServiceResult.ok(response);
+        } else {
+            log.warn("Movie not found for ID: {}", movieId);
+            try {
+                redisService.setValueWithExpireTime(CommonConstants.RedisKey.PREFIX_MOVIE_DETAIL + movieId, "NULL", 30, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                log.error("Failed to cache movie detail", e);
+            }
         }
         return ServiceResult.fail(ErrorCode.MOVIE_NOT_FOUND);
+    }
+
+    private boolean tryLock(String key, long expireTime, TimeUnit timeUnit) {
+        try {
+            return redisService.setValueWithExpireTimeIfAbsent(key, "LOCKED", expireTime, timeUnit);
+        } catch (Exception e) {
+            log.error("Failed to acquire lock for key: {}", key, e);
+            return false;
+        }
     }
 
     @Override
@@ -180,6 +277,8 @@ public class MovieServiceImpl implements MovieService {
             List<Long> ids = pageResult.getContent()
                     .stream().map(MovieDocument::getId)
                     .toList();
+
+            prefixSearchSuggestionService.recordSearch(CommonConstants.RedisKey.PREFIX_SUGGESTION, keyword);
 
             List<Movie> movies = movieRepository.findAllById(ids);
             PageResult<Movie> moviePageResult = PageResult.<Movie>builder()
@@ -195,5 +294,11 @@ public class MovieServiceImpl implements MovieService {
             log.error("Failed to search movies", e);
         }
         return null;
+    }
+
+    @Override
+    public ServiceResult suggestions(String keyword, Integer limit) {
+        Set<String> suggestions = prefixSearchSuggestionService.suggest(CommonConstants.RedisKey.PREFIX_SUGGESTION, keyword, limit);
+        return ServiceResult.ok(suggestions);
     }
 }

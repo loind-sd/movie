@@ -1,0 +1,51 @@
+{{- if .Values.configMap.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "microservice.fullname" . }}-config
+  labels:
+    {{- include "auth-service-helm.labels" . | nindent 4 }}
+data:
+  # Spring Boot application properties
+  SPRING_PROFILES_ACTIVE: {{ .Values.configMap.springProfile | default "default" | quote }}
+  SERVER_PORT: {{ .Values.container.port | quote }}
+  
+  # Logging configuration
+  {{- if .Values.configMap.logging }}
+  LOGGING_LEVEL_ROOT: {{ .Values.configMap.logging.rootLevel | default "INFO" | quote }}
+  LOGGING_LEVEL_APP: {{ .Values.configMap.logging.appLevel | default "DEBUG" | quote }}
+  {{- end }}
+  
+  # Service discovery (Eureka/Consul)
+  {{- if .Values.configMap.serviceDiscovery }}
+  {{- if .Values.configMap.serviceDiscovery.eureka }}
+  EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: {{ .Values.configMap.serviceDiscovery.eureka.url | quote }}
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: {{ .Values.configMap.serviceDiscovery.eureka.preferIpAddress | default "true" | quote }}
+  {{- end }}
+  {{- end }}
+  
+  # Kafka configuration
+  {{- if .Values.configMap.kafka }}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.kafka.bootstrapServers | quote }}
+  SPRING_KAFKA_CONSUMER_GROUP_ID: {{ .Values.configMap.kafka.consumerGroupId | default (include "microservice.fullname" .) | quote }}
+  {{- end }}
+  
+  # Redis configuration
+  {{- if .Values.configMap.redis }}
+  SPRING_REDIS_HOST: {{ .Values.configMap.redis.host | quote }}
+  SPRING_REDIS_PORT: {{ .Values.configMap.redis.port | default "6379" | quote }}
+  {{- end }}
+  
+  # Database configuration (non-sensitive)
+  {{- if .Values.configMap.database }}
+  SPRING_DATASOURCE_URL: {{ .Values.configMap.database.url | quote }}
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: {{ .Values.configMap.database.driverClassName | default "org.postgresql.Driver" | quote }}
+  SPRING_JPA_HIBERNATE_DDL_AUTO: {{ .Values.configMap.database.ddlAuto | default "validate" | quote }}
+  SPRING_JPA_SHOW_SQL: {{ .Values.configMap.database.showSql | default "false" | quote }}
+  {{- end }}
+  
+  # Custom application properties
+  {{- range $key, $value := .Values.configMap.custom }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}

@@ -6,6 +6,10 @@ public interface CommonConstants {
         String SEAT_KEY = SEAT_KEY_PREFIX + "%d_SEAT_%d";
         String BOOKING_KEY = "BOOKING_USER_ID_%d_SHOWTIME_ID_%d";
         String TOKEN_KEY = "TOKEN_%s";
+
+        String PREFIX_SUGGESTION = "search:prefix:suggestions";
+        String PREFIX_MOVIE_DETAIL = "movie:";
+        String PREFIX_MOVIE_DETAIL_LOCK = "lock:movie:";
     }
 
     interface KafkaTopic {

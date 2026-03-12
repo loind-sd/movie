@@ -14,6 +14,12 @@
         <option value="$PROJECT_DIR$/payment-service/pom.xml" />
         <option value="$PROJECT_DIR$/gateway/pom.xml" />
         <option value="$PROJECT_DIR$/cinema-kafka-common/pom.xml" />
+        <option value="$PROJECT_DIR$/analytics-service/pom.xml" />
+        <option value="$PROJECT_DIR$/aws-s3-service/pom.xml" />
+        <option value="$PROJECT_DIR$/aws-ses-service/pom.xml" />
+        <option value="$PROJECT_DIR$/aws-dynamoDB-service/pom.xml" />
+        <option value="$PROJECT_DIR$/mongoDB-service/pom.xml" />
+        <option value="$PROJECT_DIR$/aws-lambda-service/pom.xml" />
       </list>
     </option>
   </component>

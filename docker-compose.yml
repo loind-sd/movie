@@ -108,6 +108,22 @@ services:
     depends_on:
       - elasticsearch
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.14.3
+    container_name: logstash-movie
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044"   # Beats (Filebeat)
+      - "5000:5000"   # TCP
+      - "9600:9600"   # Logstash monitoring API
+    environment:
+      - LS_JAVA_OPTS=-Xms512m -Xmx512m
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
   apm-server:
     image: docker.elastic.co/apm/apm-server:8.14.3
     container_name: apm-server
@@ -127,9 +143,55 @@ services:
     networks:
       - elk
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus-movie
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana-movie
+    ports:
+      - "3000:3000"
+
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    volumes:
+      - ./dynamodb-data:/home/dynamodblocal/data
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    container_name: dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: http://dynamodb:8000
+    depends_on:
+      - dynamodb
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret123
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
   postgres_data:
   es_data:
+  mongo_data:
 
 networks:
   elk:

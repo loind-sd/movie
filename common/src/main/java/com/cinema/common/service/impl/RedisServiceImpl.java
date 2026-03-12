@@ -1,7 +1,12 @@
 package com.cinema.common.service.impl;
 
 import com.cinema.common.service.RedisService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Range;
+import org.springframework.data.redis.connection.Limit;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -10,10 +15,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
+@Slf4j
 public class RedisServiceImpl implements RedisService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final HashOperations<String, String, Object> hashOperations;
+    private final RedisTemplate<String, String> stringRedisTemplate;
+
+    public RedisServiceImpl(RedisTemplate<String, Object> redisTemplate,
+                            HashOperations<String, String, Object> hashOperations,
+                            @Qualifier("stringRedisTemplatess")
+                            RedisTemplate<String, String> stringRedisTemplate) {
+        this.redisTemplate = redisTemplate;
+        this.hashOperations = hashOperations;
+        this.stringRedisTemplate = stringRedisTemplate;
+    }
+
+    @PostConstruct
+    void logSerializer() {
+        log.info("Redis value serializer = {}",
+                stringRedisTemplate.getValueSerializer().getClass().getName());
+    }
 
     @Override
     public void setValue(String key, Object value) {
@@ -23,6 +44,11 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public void setValueWithExpireTime(String key, Object value, long expireTime, TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(key, value, expireTime, timeUnit);
+    }
+
+    @Override
+    public boolean setValueWithExpireTimeIfAbsent(String key, Object value, long expireTime, TimeUnit timeUnit) {
+        return redisTemplate.opsForValue().setIfAbsent(key, value, expireTime, timeUnit);
     }
 
     @Override
@@ -70,4 +96,29 @@ public class RedisServiceImpl implements RedisService {
     public void convertAndSend(String channel, Object message) {
         redisTemplate.convertAndSend(channel, message);
     }
+
+    @Override
+    public void incrementZSet(String key, String member, double delta) {
+        stringRedisTemplate.opsForZSet().incrementScore(key, member, delta);
+    }
+
+    @Override
+    public Set<String> reverseRangeByLex(String key, Range<String> range, Limit limit) {
+        return stringRedisTemplate.opsForZSet().reverseRangeByLex(key, range, limit);
+    }
+
+    @Override
+    public void keepZSetTopN(String key, int topN) {
+        Long size = stringRedisTemplate.opsForZSet().size(key);
+        if (size == null || size <= topN) {
+            return;
+        }
+
+        long end = size - topN - 1;
+
+        stringRedisTemplate.opsForZSet()
+                .removeRange(key, 0, end);
+    }
+
+
 }

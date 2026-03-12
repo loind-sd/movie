@@ -24,7 +24,7 @@ public class TokenService {
             return String.valueOf(data);
         }
 
-        // không có token của user này, gọi auth service để lấy
+        // không có token của user này, call auth-service để lấy
         try {
             RefreshTokenRequest request = new RefreshTokenRequest(userId, "", true);
             String url = "http://localhost:8080/api/auth/refresh"; // URL của auth service

@@ -57,6 +57,15 @@ public class MovieController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/suggestions")
+    public ResponseEntity<?> suggestions(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "10") Integer limit
+    ) {
+        ServiceResult result = movieService.suggestions(keyword, limit);
+        return ResponseEntity.ok(result);
+    }
+
 
 
 }

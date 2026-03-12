@@ -1,0 +1,64 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://host.docker.internal:5432/movie
+    username: postgres
+    password: 123456
+
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: CinemaScheduler
+            instanceId: AUTO
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            isClustered: true
+            tablePrefix: QRTZ_
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: host.docker.internal
+      port: 6379
+      password:
+      timeout: 2000
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:public.pem
+  application:
+    name: showtime-service
+
+cinema:
+  security:
+    jwt:
+      user-id-claim: sub
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    tags:
+      application: showtime-service
+
+server:
+  port: 8084

@@ -31,7 +31,7 @@ public class AuthService {
     private final RedisService redisService;
 
     @Value("${jwt.access-token-expire}")
-    private Integer accessTokenExpire;
+    private Long accessTokenExpire;
 
     public JwtResponse login(AuthRequest request) {
         String username = request.username();

@@ -1,0 +1,25 @@
+nameOverride: showtime-service
+fullnameOverride: showtime-service
+
+image:
+  repository: loind/showtime-service
+  tag: "1.0"
+
+service:
+  port: 8084
+  targetPort: 8084
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8084
+  initialDelaySeconds: 40
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8084
+  initialDelaySeconds: 30
+
+container:
+  port: 8084

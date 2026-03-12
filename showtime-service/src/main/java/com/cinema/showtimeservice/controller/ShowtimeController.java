@@ -22,7 +22,7 @@ public class ShowtimeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceResult> getDetails(@PathVariable Long id) {
+    public ResponseEntity<ServiceResult> getDetails(@PathVariable Long id) throws Exception {
         ServiceResult result = showtimeService.getDetails(id);
         return ResponseEntity.ok(result);
     }
@@ -42,6 +42,21 @@ public class ShowtimeController {
     @PutMapping()
     public ResponseEntity<ServiceResult> update(@RequestBody UpdateShowtimeRequest request) {
         ServiceResult result = showtimeService.update(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ServiceResult> recordSearch(@RequestParam String keyword) {
+        ServiceResult result = showtimeService.recordSearch(keyword);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/suggestions")
+    public ResponseEntity<ServiceResult> suggestions(
+            @RequestParam String keyword,
+            @RequestParam Integer limit
+    ) throws Exception {
+        ServiceResult result = showtimeService.suggestions(keyword, limit);
         return ResponseEntity.ok(result);
     }
 }

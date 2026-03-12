@@ -15,9 +15,19 @@ spring:
       password:
       timeout: 2000
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 jwt:
   issuer: cinema-auth
-  access-token-expire: 900000 # 15 minutes
+  access-token-expire: 2592000000 # 15 minutes
   refresh-token-expire: 2592000000 # 30 days
   private-key: classpath:private.pem
 

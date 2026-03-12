@@ -36,4 +36,18 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long>, Showt
         select 1 from show_time s where s.id <> ?1 and room_id = ?2 and s.start_time < ?4 and s.end_time > ?3
     """, nativeQuery = true)
     Optional<Integer> checkDuplicateTimeSlot(Long id, Long roomId, LocalDateTime startTime, LocalDateTime endTime);
+
+
+    @Query(value = """
+          select u.id, u.name
+          from zzz_test_users u
+                   join
+               (select user_id, sum(total_amount)
+                from zzz_test_orders
+                where 1 = 1
+                group by user_id
+                order by 2 desc
+                limit ?1) t on u.id = t.user_id
+    """, nativeQuery = true)
+    List<Object> slowQuery(Integer limit);
 }

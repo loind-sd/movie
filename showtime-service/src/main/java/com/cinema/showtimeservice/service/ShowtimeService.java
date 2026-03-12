@@ -7,9 +7,13 @@ import com.cinema.showtimeservice.dto.request.UpdateShowtimeRequest;
 
 public interface ShowtimeService {
     ServiceResult create(CreateShowtimeRequest request);
-    ServiceResult getDetails(Long showtimeId);
+    ServiceResult getDetails(Long showtimeId) throws Exception;
     ServiceResult update(UpdateShowtimeRequest request);
     ServiceResult searchShowTime(SearchShowtimeRequest request);
 
     ServiceResult getShowtimeMap(Long showtimeId);
+
+
+    ServiceResult recordSearch(String keyword);
+    ServiceResult suggestions(String keyword, Integer limit) throws Exception;
 }

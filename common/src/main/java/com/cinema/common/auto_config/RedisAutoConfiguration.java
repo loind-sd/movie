@@ -40,6 +40,23 @@ public class RedisAutoConfiguration {
         return template;
     }
 
+    @Bean("stringRedisTemplatess")
+    @ConditionalOnMissingBean
+    public RedisTemplate<String, String> stringRedisTemplatess(
+            RedisConnectionFactory connectionFactory
+    ) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
+
+        template.afterPropertiesSet();
+        return template;
+    }
+
     /**
      * Tạo bean HashOperations nếu chưa có bean nào cùng loại được định nghĩa trong ngữ cảnh ứng dụng.
      * Sử dụng RedisTemplate để khởi tạo HashOperations.
@@ -58,8 +75,12 @@ public class RedisAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public RedisServiceImpl redisService(RedisTemplate<String, Object> redisTemplate, HashOperations<String, String, Object> hashOperations) {
-        return new RedisServiceImpl(redisTemplate, hashOperations) {
+    public RedisServiceImpl redisService(
+            RedisTemplate<String, Object> redisTemplate,
+            HashOperations<String, String, Object> hashOperations,
+            RedisTemplate<String, String> stringRedisTemplatess
+            ) {
+        return new RedisServiceImpl(redisTemplate, hashOperations, stringRedisTemplatess) {
         };
     }
 }
