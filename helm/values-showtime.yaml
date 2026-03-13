@@ -3,7 +3,7 @@ fullnameOverride: showtime-service
 
 image:
   repository: loind/showtime-service
-  tag: "1.0"
+  tag: "1.1"
 
 service:
   port: 8084
@@ -23,3 +23,28 @@ readinessProbe:
 
 container:
   port: 8084
+
+# ================================
+# OVERRIDE CẤU HÌNH CHO PROD
+# ================================
+configMap:
+  enabled: true
+  springProfile: "prod"
+  database:
+    # ⚠️ THAY IP NÀY BẰNG IP IPv4 CỦA MÁY TÍNH BẠN (VD: 192.168.1.10)
+    # Nếu DB cài trực tiếp trên máy host thì K8s sẽ đi xuyên qua IP mạng LAN.
+    url: "jdbc:postgresql://10.30.101.116:5432/movie"
+    driverClassName: "org.postgresql.Driver"
+  redis:
+    # ⚠️ THAY IP NÀY BẰNG IP IPv4 CỦA MÁY TÍNH BẠN (VD: 192.168.1.10)
+    host: "10.30.101.116"
+  custom:
+    # Vì file gốc bạn dùng config properties "cinema.kafka.bootstrap-servers"
+    # thay vì "spring.kafka...", ta cần override biến này.
+    CINEMA_KAFKA_BOOTSTRAP_SERVERS: "10.30.101.116:9092"
+
+secret:
+  enabled: true
+  database:
+    username: "postgres"
+    password: "123456" # Mật khẩu của postgres
