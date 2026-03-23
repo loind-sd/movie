@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/movie
+    username: postgres
+    password: 123456
+
+cinema:
+  kafka:
+    bootstrap-servers: localhost:9092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    enable:
+      all: true
+    tags:
+      application: kafka-dlt-service
+
+server:
+  port: 8090

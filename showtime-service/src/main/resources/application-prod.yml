@@ -17,7 +17,7 @@ spring:
           jobStore:
             driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
             isClustered: true
-            tablePrefix: QRTZ_
+            tablePrefix: scheduler.QRTZ_
           threadPool:
             class: org.quartz.simpl.SimpleThreadPool
             threadCount: 10

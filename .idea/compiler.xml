@@ -10,6 +10,7 @@
         <module name="analytic-service" />
         <module name="aws-ses-service" />
         <module name="aws-dynamoDB-service" />
+        <module name="kafka-dlq-service" />
         <module name="aws-lambda-service" />
         <module name="cinema-security-starter" />
         <module name="gateway" />
@@ -102,6 +103,7 @@
       <module name="common" options="-parameters" />
       <module name="debezium-service" options="-parameters" />
       <module name="gateway" options="-parameters" />
+      <module name="kafka-dlq-service" options="-parameters" />
       <module name="mongoDB-service" options="-parameters" />
       <module name="movie-booking-be" options="-parameters" />
       <module name="movie-service" options="-parameters" />

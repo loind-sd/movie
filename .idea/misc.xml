@@ -20,6 +20,7 @@
         <option value="$PROJECT_DIR$/aws-dynamoDB-service/pom.xml" />
         <option value="$PROJECT_DIR$/mongoDB-service/pom.xml" />
         <option value="$PROJECT_DIR$/aws-lambda-service/pom.xml" />
+        <option value="$PROJECT_DIR$/kafka-dead-letter-service/pom.xml" />
       </list>
     </option>
   </component>

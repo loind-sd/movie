@@ -42,7 +42,7 @@ spring:
             - Path=/api/rooms/**
 
         - id: showtime-service
-          uri: lb://showtime-service
+          uri: http://showtime-service.default.svc.cluster.local:8084
           predicates:
             - Path=/api/showtime/**
 

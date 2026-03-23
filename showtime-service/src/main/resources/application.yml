@@ -17,7 +17,7 @@ spring:
           jobStore:
             driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
             isClustered: true
-            tablePrefix: QRTZ_
+            tablePrefix: scheduler.QRTZ_
           threadPool:
             class: org.quartz.simpl.SimpleThreadPool
             threadCount: 10
@@ -54,6 +54,14 @@ management:
       all: true
     tags:
       application: showtime-service
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://localhost:4317
+
+  service:
+    name: order-service
 
 server:
   port: 8084
