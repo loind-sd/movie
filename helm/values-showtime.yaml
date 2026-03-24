@@ -3,7 +3,7 @@ fullnameOverride: showtime-service
 
 image:
   repository: loind/showtime-service
-  tag: "1.3"
+  tag: "1.4"
 
 service:
   type: ClusterIP
