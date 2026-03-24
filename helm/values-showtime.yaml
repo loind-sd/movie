@@ -1,13 +1,13 @@
 nameOverride: showtime-service
 fullnameOverride: showtime-service
 
-resources:
-  requests:
-    cpu: 100m        # tối thiểu cần 10% core
-    memory: 256Mi    # tối thiểu 256MB RAM
-  limits:
-    cpu: 500m        # tối đa nửa core
-    memory: 512Mi    # tối đa 512MB RAM — vượt là bị kill
+#resources:
+#  requests:
+#    cpu: 100m        # tối thiểu cần 10% core
+#    memory: 256Mi    # tối thiểu 256MB RAM
+#  limits:
+#    cpu: 500m        # tối đa nửa core
+#    memory: 512Mi    # tối đa 512MB RAM — vượt là bị kill
 
 image:
   repository: loind/showtime-service
@@ -18,10 +18,10 @@ service:
   port: 8084
   targetPort: 8084
 
-podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/path: "/actuator/prometheus"
-  prometheus.io/port: "8084"
+#podAnnotations:
+#  prometheus.io/scrape: "true"
+#  prometheus.io/path: "/actuator/prometheus"
+#  prometheus.io/port: "8084"
 
 livenessProbe:
   httpGet:
