@@ -145,11 +145,6 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         response.setPrices(showtimePriceMapper.toShowtimePriceItems(prices));
 
         showtimeCounter.increment();
-
-        if (1 == 1) {
-            throw new Exception("hihi");
-        }
-
         return ServiceResult.ok(response);
     }
 
