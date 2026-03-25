@@ -27,13 +27,13 @@ livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: 8084
-  initialDelaySeconds: 40
+  initialDelaySeconds: 140
 
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: 8084
-  initialDelaySeconds: 30
+  initialDelaySeconds: 130
 
 container:
   port: 8084
