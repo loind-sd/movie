@@ -1,7 +1,7 @@
 nameOverride: gateway-service
 fullnameOverride: gateway-service
 
-replicaCount: 1
+replicaCount: 3
 
 image:
   repository: loind/gateway-service
@@ -32,7 +32,7 @@ livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: 8080
-  initialDelaySeconds: 600    # ← chờ 60s sau khi container start mới bắt đầu probe
+  initialDelaySeconds: 140    # ← chờ 60s sau khi container start mới bắt đầu probe
   periodSeconds: 15          # probe mỗi 15s
   failureThreshold: 3        # fail 3 lần liên tiếp mới kill
   timeoutSeconds: 5
@@ -41,7 +41,7 @@ readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: 8080
-  initialDelaySeconds: 300    # readiness check sớm hơn liveness
+  initialDelaySeconds: 130    # readiness check sớm hơn liveness
   periodSeconds: 10
   failureThreshold: 3
   timeoutSeconds: 5

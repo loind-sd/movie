@@ -9,6 +9,8 @@ fullnameOverride: showtime-service
 #    cpu: 500m        # tối đa nửa core
 #    memory: 512Mi    # tối đa 512MB RAM — vượt là bị kill
 
+replicaCount: 3
+
 image:
   repository: loind/showtime-service
   tag: "1.5"
