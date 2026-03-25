@@ -28,23 +28,27 @@ ingress:
 rbac:
   create: true
 
-startupProbe:
-  httpGet:
-    path: /actuator/health/liveness
-    port: 8080
-  failureThreshold: 30
-  periodSeconds: 5
-
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: 8080
-  periodSeconds: 10
-  failureThreshold: 3
+  initialDelaySeconds: 60    # ← chờ 60s sau khi container start mới bắt đầu probe
+  periodSeconds: 15          # probe mỗi 15s
+  failureThreshold: 3        # fail 3 lần liên tiếp mới kill
+  timeoutSeconds: 5
 
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: 8080
+  initialDelaySeconds: 30    # readiness check sớm hơn liveness
   periodSeconds: 10
   failureThreshold: 3
+  timeoutSeconds: 5
+
+startupProbe:               # ← cách tốt hơn cho app chậm khởi động
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  failureThreshold: 30      # cho phép fail 30 lần × periodSeconds 10s = 5 phút để khởi động
+  periodSeconds: 10
