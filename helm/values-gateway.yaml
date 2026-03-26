@@ -1,7 +1,7 @@
 nameOverride: gateway-service
 fullnameOverride: gateway-service
 
-replicaCount: 3
+replicaCount: 2
 
 image:
   repository: loind/gateway-service
