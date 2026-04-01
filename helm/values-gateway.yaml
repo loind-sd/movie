@@ -3,6 +3,9 @@ fullnameOverride: gateway-service
 
 replicaCount: 1
 
+showtimeHpa:
+  enabled: false
+
 image:
   repository: loind/gateway-service
   tag: "1.0"

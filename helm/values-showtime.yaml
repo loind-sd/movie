@@ -11,6 +11,12 @@ fullnameOverride: showtime-service
 
 replicaCount: 1
 
+showtimeHpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetRPS: "20"
+
 image:
   repository: loind/showtime-service
   tag: "1.5"

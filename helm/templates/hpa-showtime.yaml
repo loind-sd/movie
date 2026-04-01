@@ -1,3 +1,4 @@
+{{- if .Values.showtimeHpa.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -8,8 +9,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: showtime-service
-  minReplicas: 2
-  maxReplicas: 10
+  minReplicas: {{ .Values.showtimeHpa.minReplicas }}
+  maxReplicas: {{ .Values.showtimeHpa.maxReplicas }}
   metrics:
     - type: Pods
       pods:
@@ -17,4 +18,5 @@ spec:
           name: http_requests_per_second
         target:
           type: AverageValue
-          averageValue: "20"
+          averageValue: "{{ .Values.showtimeHpa.targetRPS }}"
+{{- end }}
