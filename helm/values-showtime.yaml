@@ -9,7 +9,7 @@ fullnameOverride: showtime-service
 #    cpu: 500m        # tối đa nửa core
 #    memory: 512Mi    # tối đa 512MB RAM — vượt là bị kill
 
-replicaCount: 1
+replicaCount: 2
 
 showtimeHpa:
   enabled: true
