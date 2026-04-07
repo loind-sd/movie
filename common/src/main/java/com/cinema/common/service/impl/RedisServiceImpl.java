@@ -122,10 +122,10 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public Object checkExistAndPerform(String key, Function<String, Object> action) {
+    public <T> T checkExistAndPerform(String key, Function<String, T> action, Class<T> type) {
         Object data = getValue(key);
         if (data != null) {
-            return data;
+            return type.cast(data);
         }
         int retryCount = 1;
         while (retryCount++ <= 3) {
@@ -133,7 +133,7 @@ public class RedisServiceImpl implements RedisService {
             if (lockAcquired) {
                 Object result = getValue(key) ;
                 if (result != null) {
-                    return result;
+                    return type.cast(result);
                 }
                 return action.apply(key);
             } else {
@@ -146,7 +146,7 @@ public class RedisServiceImpl implements RedisService {
                 // check đã có cache hay chưa sau khi chờ
                 Object result = getValue(key);
                 if (result != null) {
-                    return result;
+                    return type.cast(result);
                 }
             }
         }

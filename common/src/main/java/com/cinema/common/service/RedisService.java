@@ -29,5 +29,5 @@ public interface RedisService {
     Set<String> reverseRangeByLex(String key, Range<String> range, Limit limit);
     void keepZSetTopN(String key, int topN);
 
-    Object checkExistAndPerform(String key, Function<String, Object> action);
+    <T> T checkExistAndPerform(String key, Function<String, T> loader, Class<T> type);
 }
