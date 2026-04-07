@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public interface RedisService {
     void setValue(String key, Object value);
@@ -27,4 +28,6 @@ public interface RedisService {
     void incrementZSet(String key, String member, double delta);
     Set<String> reverseRangeByLex(String key, Range<String> range, Limit limit);
     void keepZSetTopN(String key, int topN);
+
+    Object checkExistAndPerform(String key, Function<String, Object> action);
 }

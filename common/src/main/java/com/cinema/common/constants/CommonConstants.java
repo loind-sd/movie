@@ -10,6 +10,8 @@ public interface CommonConstants {
         String PREFIX_SUGGESTION = "search:prefix:suggestions";
         String PREFIX_MOVIE_DETAIL = "movie:";
         String PREFIX_MOVIE_DETAIL_LOCK = "lock:movie:";
+
+        String PREFIX_SHOWTIME_DETAIL = "showtime:";
     }
 
     interface KafkaTopic {

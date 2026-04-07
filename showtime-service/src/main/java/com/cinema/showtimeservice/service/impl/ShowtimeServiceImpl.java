@@ -24,6 +24,8 @@ import com.cinema.showtimeservice.mapper.ShowtimeMapper;
 import com.cinema.showtimeservice.mapper.ShowtimePriceMapper;
 import com.cinema.showtimeservice.repository.*;
 import com.cinema.showtimeservice.service.ShowtimeService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -57,8 +60,9 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     private final Counter showtimeCounter;
 
     private final Random random = new Random();
+    private final ObjectMapper objectMapper;
 
-    public ShowtimeServiceImpl(ShowtimeRepository showtimeRepository, MovieRepository movieRepository, ShowtimePriceRepository showtimePriceRepository, ShowtimeMapper showtimeMapper, ShowtimePriceMapper showtimePriceMapper, RoomRepository roomRepository, SeatRepository seatRepository, RedisService redisService, RestTemplate restTemplate, KafkaProducer kafkaProducer, PrefixSearchSuggestionService prefixSearchSuggestionService, MeterRegistry registry) {
+    public ShowtimeServiceImpl(ShowtimeRepository showtimeRepository, MovieRepository movieRepository, ShowtimePriceRepository showtimePriceRepository, ShowtimeMapper showtimeMapper, ShowtimePriceMapper showtimePriceMapper, RoomRepository roomRepository, SeatRepository seatRepository, RedisService redisService, RestTemplate restTemplate, KafkaProducer kafkaProducer, PrefixSearchSuggestionService prefixSearchSuggestionService, MeterRegistry registry, ObjectMapper objectMapper) {
         this.showtimeRepository = showtimeRepository;
         this.movieRepository = movieRepository;
         this.showtimePriceRepository = showtimePriceRepository;
@@ -73,6 +77,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         this.showtimeCounter = Counter.builder("showtime_total")
                 .description("Total Showtime")
                 .register(registry);
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -131,19 +136,38 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     }
 
     @Override
-    public ServiceResult getDetails(Long showtimeId) throws Exception {
-        log.debug("Get showtime details for id: {}", showtimeId);
-        Optional<Showtime> showtimeOpt = showtimeRepository.findById(showtimeId);
-        if (showtimeOpt.isEmpty()) {
-            log.warn("Showtime with id {} not found", showtimeId);
-            throw new BadRequestException(ErrorCode.SHOWTIME_NOT_FOUND);
+    public ServiceResult getDetails(Long showtimeId) {
+        log.info("Get showtime details for id: {}, thread: {}", showtimeId, Thread.currentThread());
+
+        Object data = redisService.checkExistAndPerform(
+                CommonConstants.RedisKey.PREFIX_SHOWTIME_DETAIL + showtimeId,
+                key -> {
+                    Optional<Showtime> showtimeOpt = showtimeRepository.findById(showtimeId);
+                    if (showtimeOpt.isEmpty()) {
+                        log.warn("Showtime with id {} not found", showtimeId);
+                        throw new BadRequestException(ErrorCode.SHOWTIME_NOT_FOUND);
+                    }
+
+                    Showtime showtime = showtimeOpt.get();
+                    ShowtimeDetailResponse response = showtimeMapper.toShowtimeDetailResponse(showtime);
+                    List<ShowtimePrice> prices = showtimePriceRepository.findByShowtimeId(showtimeId);
+                    response.setPrices(showtimePriceMapper.toShowtimePriceItems(prices));
+
+                    redisService.setValueWithExpireTime(
+                            CommonConstants.RedisKey.PREFIX_SHOWTIME_DETAIL + showtimeId,
+                            response,
+                            60L,
+                            TimeUnit.SECONDS
+                    );
+                    return response;
+                }
+        );
+        ShowtimeDetailResponse response = null;
+        try {
+            response = objectMapper.readValue(objectMapper.writeValueAsString(data), ShowtimeDetailResponse.class);
+        } catch (JsonProcessingException e) {
+            response = (ShowtimeDetailResponse) data;
         }
-
-        Showtime showtime = showtimeOpt.get();
-        ShowtimeDetailResponse response = showtimeMapper.toShowtimeDetailResponse(showtime);
-        List<ShowtimePrice> prices = showtimePriceRepository.findByShowtimeId(showtimeId);
-        response.setPrices(showtimePriceMapper.toShowtimePriceItems(prices));
-
         showtimeCounter.increment();
         return ServiceResult.ok(response);
     }
@@ -274,11 +298,11 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     @Override
     public ServiceResult suggestions(String keyword, Integer limit) throws Exception {
-        showtimeRepository.slowQuery(10);
-
-        if (1 == 1) {
-            throw new Exception("hihi");
-        }
+//        showtimeRepository.slowQuery(10);
+//
+//        if (1 == 1) {
+//            throw new Exception("hihi");
+//        }
 
         return ServiceResult.ok(prefixSearchSuggestionService.suggest(
                 CommonConstants.RedisKey.PREFIX_SUGGESTION, keyword, limit

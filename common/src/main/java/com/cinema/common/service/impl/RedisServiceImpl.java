@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Slf4j
 public class RedisServiceImpl implements RedisService {
@@ -118,6 +119,48 @@ public class RedisServiceImpl implements RedisService {
 
         stringRedisTemplate.opsForZSet()
                 .removeRange(key, 0, end);
+    }
+
+    @Override
+    public Object checkExistAndPerform(String key, Function<String, Object> action) {
+        Object data = getValue(key);
+        if (data != null) {
+            return data;
+        }
+        int retryCount = 1;
+        while (retryCount++ <= 3) {
+            boolean lockAcquired = tryLock(key + ":lock", 10, TimeUnit.SECONDS);
+            if (lockAcquired) {
+                Object result = getValue(key) ;
+                if (result != null) {
+                    return result;
+                }
+                return action.apply(key);
+            } else {
+                try {
+                    Thread.sleep(100); // Wait briefly before retrying
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                // check đã có cache hay chưa sau khi chờ
+                Object result = getValue(key);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+
+        return action.apply(key);
+    }
+
+    private boolean tryLock(String key, long expireTime, TimeUnit timeUnit) {
+        try {
+            return setValueWithExpireTimeIfAbsent(key, "LOCKED", expireTime, timeUnit);
+        } catch (Exception e) {
+            log.error("Failed to acquire lock for key: {}", key, e);
+            return false;
+        }
     }
 
 
